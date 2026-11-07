@@ -1,0 +1,51 @@
+<Application x:Class="OGŚ.App"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ StartupUri="MainWindow.xaml">
+ <Application.Resources>
+  <SolidColorBrush x:Key="Bg" Color="#101722"/>
+  <SolidColorBrush x:Key="Panel" Color="#182333"/>
+  <SolidColorBrush x:Key="Panel2" Color="#202E40"/>
+  <SolidColorBrush x:Key="Accent" Color="#54B6A7"/>
+  <SolidColorBrush x:Key="Text" Color="#EDF3F8"/>
+  <SolidColorBrush x:Key="Muted" Color="#9EADBD"/>
+  <Style TargetType="Button">
+   <Setter Property="Foreground" Value="{StaticResource Text}"/>
+   <Setter Property="Background" Value="{StaticResource Panel2}"/>
+   <Setter Property="BorderBrush" Value="#35475C"/>
+   <Setter Property="BorderThickness" Value="1"/>
+   <Setter Property="Padding" Value="12,7"/>
+   <Setter Property="Margin" Value="3"/>
+   <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+  <Style TargetType="TextBox">
+   <Setter Property="Foreground" Value="{StaticResource Text}"/>
+   <Setter Property="Background" Value="#111B28"/>
+   <Setter Property="BorderBrush" Value="#35475C"/>
+   <Setter Property="Padding" Value="8,6"/>
+   <Setter Property="CaretBrush" Value="White"/>
+  </Style>
+  <Style TargetType="DataGrid">
+   <Setter Property="Background" Value="#152131"/>
+   <Setter Property="Foreground" Value="{StaticResource Text}"/>
+   <Setter Property="RowBackground" Value="#182536"/>
+   <Setter Property="AlternatingRowBackground" Value="#1C2B3D"/>
+   <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+   <Setter Property="HorizontalGridLinesBrush" Value="#2A3A4D"/>
+   <Setter Property="BorderThickness" Value="0"/>
+   <Setter Property="HeadersVisibility" Value="Column"/>
+   <Setter Property="CanUserAddRows" Value="False"/>
+   <Setter Property="IsReadOnly" Value="True"/>
+   <Setter Property="SelectionMode" Value="Extended"/>
+   <Setter Property="SelectionUnit" Value="FullRow"/>
+   <Setter Property="AutoGenerateColumns" Value="False"/>
+  </Style>
+  <Style TargetType="DataGridColumnHeader">
+   <Setter Property="Background" Value="#243448"/>
+   <Setter Property="Foreground" Value="#C5D2DF"/>
+   <Setter Property="Padding" Value="8,7"/>
+   <Setter Property="BorderThickness" Value="0,0,0,1"/>
+   <Setter Property="BorderBrush" Value="#35475C"/>
+  </Style>
+ </Application.Resources>
+</Application>

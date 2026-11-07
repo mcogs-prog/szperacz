@@ -1,0 +1,224 @@
+<Window x:Class="OGŚ.MainWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="Szperacz 1.6.1 PRO — Menedżer plików OGŚ" Height="900" Width="1420" MinHeight="680" MinWidth="1050"
+ WindowStartupLocation="CenterScreen" Background="{StaticResource Bg}"
+ Icon="Szperacz.ico"
+ PreviewKeyDown="Window_PreviewKeyDown"
+ Closing="Window_Closing">
+ <Grid Margin="10">
+  <Grid.RowDefinitions>
+   <RowDefinition Height="Auto"/> <!-- Górne menu i Button Bar -->
+   <RowDefinition Height="Auto"/> <!-- Skróty i pasek pomocy -->
+   <RowDefinition Height="*"/>    <!-- Panele plików -->
+   <RowDefinition Height="Auto"/> <!-- Wiersz poleceń CLI -->
+   <RowDefinition Height="Auto"/> <!-- Pasek funkcyjny F3-F8 -->
+   <RowDefinition Height="Auto"/> <!-- Status i postęp -->
+  </Grid.RowDefinitions>
+
+  <!-- Górny pasek: Logo + Button Bar -->
+  <DockPanel Grid.Row="0" Margin="0,0,0,6">
+   <StackPanel DockPanel.Dock="Left">
+    <TextBlock Text="SZPERACZ PRO" Foreground="{StaticResource Text}" FontSize="24" FontWeight="Bold"/>
+    <TextBlock Text="Wersja 1.6.1 PRO • FTP &amp; Folder Tree • OGŚ" Foreground="{StaticResource Muted}" FontSize="11"/>
+   </StackPanel>
+   
+   <!-- Button Bar (Szybkie programy i narzędzia) -->
+   <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+    <Button Content="🌐 FTP (Ctrl+F)" Click="FtpManager_Click" Background="#203045"/>
+    <Button Content="🌲 Drzewko (Alt+T)" Click="ToggleTree_Click"/>
+    <Button Content="⚡ Terminal (Ctrl+~)" Click="OpenTerminal_Click"/>
+    <Button Content="💻 VS Code" Click="OpenVSCode_Click"/>
+    <Button Content="⭐ Ulubione (Ctrl+D)" Click="Bookmarks_Click"/>
+    <Button Content="🏷️ Multi-Rename (Ctrl+M)" Click="MultiRename_Click"/>
+    <Button Content="⚖️ Porównaj" Click="ComparePanels_Click"/>
+    <Button Content="🔒 SHA-256" Click="Checksum_Click"/>
+    <Button Content="🔍 Szukaj (Alt+F7)" Click="Search_Click"/>
+    <Button Content="📦 ZIP (Alt+F5)" Click="PackZip_Click"/>
+    <Button Content="📂 Rozpakuj (Alt+F9)" Click="UnpackZip_Click"/>
+   </StackPanel>
+  </DockPanel>
+
+  <!-- Pasek pomocy skrótów -->
+  <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="6" Padding="10,5" Margin="0,0,0,6">
+   <DockPanel>
+    <TextBlock Text="SKRÓTY:" Foreground="{StaticResource Accent}" FontWeight="Bold" Margin="0,0,8,0" VerticalAlignment="Center"/>
+    <TextBlock Text="Tab: Przełącz | Ins/Spacja: Zaznacz | F3: Lister (Hex/Foto) | Ctrl+M: Rename | Ctrl+D: Ulubione | Ctrl+~: Terminal | Alt+F7: Szukaj | Ctrl+T/W: Karty | Ctrl+F12: Filtr" Foreground="{StaticResource Muted}" VerticalAlignment="Center"/>
+   </DockPanel>
+  </Border>
+
+  <!-- Dwa panele -->
+  <Grid Grid.Row="2">
+   <Grid.ColumnDefinitions>
+    <ColumnDefinition Width="*"/>
+    <ColumnDefinition Width="8"/>
+    <ColumnDefinition Width="*"/>
+   </Grid.ColumnDefinitions>
+
+   <!-- Lewy Panel -->
+   <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="8" Padding="8">
+    <Grid>
+     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+     </Grid.RowDefinitions>
+
+     <WrapPanel x:Name="LeftDrivesPanel" Grid.Row="0" Margin="0,0,0,4"/>
+     <WrapPanel x:Name="LeftTabsPanel" Grid.Row="1" Margin="0,0,0,4"/>
+
+     <DockPanel Grid.Row="2" Margin="0,0,0,4">
+      <TextBlock Text="L:" Foreground="{StaticResource Accent}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+      <Button DockPanel.Dock="Right" Content="W górę [..]" Click="LeftUp_Click" Padding="6,2" Margin="4,0,0,0"/>
+      <TextBox x:Name="LeftPath" KeyDown="LeftPath_KeyDown" VerticalContentAlignment="Center"/>
+     </DockPanel>
+
+     <DockPanel x:Name="LeftFilterBar" Grid.Row="3" Margin="0,0,0,4" Visibility="Collapsed">
+      <TextBlock Text="Filtr:" Foreground="{StaticResource Accent}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+      <Button DockPanel.Dock="Right" Content="✕" Click="LeftFilterClear_Click" Width="26" Margin="4,0,0,0"/>
+      <TextBox x:Name="LeftFilterBox" TextChanged="LeftFilterBox_TextChanged"/>
+     </DockPanel>
+
+     <Grid Grid.Row="4">
+      <Grid.ColumnDefinitions>
+       <ColumnDefinition x:Name="LeftTreeCol" Width="0"/>
+       <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <TreeView x:Name="LeftTree" Grid.Column="0" Background="#141E2B" Foreground="{StaticResource Text}" BorderBrush="#35475C" SelectedItemChanged="LeftTree_SelectedItemChanged" Margin="0,0,4,0"/>
+<DataGrid x:Name="LeftGrid" Grid.Column="1" MouseDoubleClick="LeftGrid_DoubleClick" GotFocus="Grid_GotFocus"
+               SelectionMode="Extended" SelectionUnit="FullRow">
+      <DataGrid.ContextMenu>
+       <ContextMenu>
+        <MenuItem Header="Otwórz (Enter)" Click="ContextOpen_Click"/>
+        <MenuItem Header="Podgląd Lister (F3)" Click="View_Click"/>
+        <MenuItem Header="Edycja w Notatniku (F4)" Click="Edit_Click"/>
+        <Separator/>
+        <MenuItem Header="Kopiuj pełną ścieżkę" Click="ContextCopyPath_Click"/>
+        <MenuItem Header="Otwórz w Eksploratorze Windows" Click="ContextOpenExplorer_Click"/>
+        <MenuItem Header="Oblicz sumę SHA-256" Click="Checksum_Click"/>
+        <Separator/>
+        <MenuItem Header="Usuń do Kosza (F8)" Click="Delete_Click"/>
+       </ContextMenu>
+      </DataGrid.ContextMenu>
+      <DataGrid.Columns>
+       <DataGridTemplateColumn Width="26">
+        <DataGridTemplateColumn.CellTemplate>
+         <DataTemplate>
+          <Image Source="{Binding IconImage}" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+         </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+       </DataGridTemplateColumn>
+       <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*"/>
+       <DataGridTextColumn Header="Rozsz." Binding="{Binding Kind}" Width="75"/>
+       <DataGridTextColumn Header="Rozmiar" Binding="{Binding SizeText}" Width="95"/>
+       <DataGridTextColumn Header="Data modyfikacji" Binding="{Binding ModifiedText}" Width="135"/>
+      </DataGrid.Columns>
+     </DataGrid>
+     </Grid>
+
+     <TextBlock x:Name="LeftSummaryText" Grid.Row="5" Text="Wczytywanie..." Foreground="{StaticResource Muted}" FontSize="11" Margin="2,4,0,0"/>
+    </Grid>
+   </Border>
+
+   <!-- Prawy Panel -->
+   <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="8" Padding="8">
+    <Grid>
+     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+     </Grid.RowDefinitions>
+
+     <WrapPanel x:Name="RightDrivesPanel" Grid.Row="0" Margin="0,0,0,4"/>
+     <WrapPanel x:Name="RightTabsPanel" Grid.Row="1" Margin="0,0,0,4"/>
+
+     <DockPanel Grid.Row="2" Margin="0,0,0,4">
+      <TextBlock Text="P:" Foreground="{StaticResource Accent}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+      <Button DockPanel.Dock="Right" Content="W górę [..]" Click="RightUp_Click" Padding="6,2" Margin="4,0,0,0"/>
+      <TextBox x:Name="RightPath" KeyDown="RightPath_KeyDown" VerticalContentAlignment="Center"/>
+     </DockPanel>
+
+     <DockPanel x:Name="RightFilterBar" Grid.Row="3" Margin="0,0,0,4" Visibility="Collapsed">
+      <TextBlock Text="Filtr:" Foreground="{StaticResource Accent}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+      <Button DockPanel.Dock="Right" Content="✕" Click="RightFilterClear_Click" Width="26" Margin="4,0,0,0"/>
+      <TextBox x:Name="RightFilterBox" TextChanged="RightFilterBox_TextChanged"/>
+     </DockPanel>
+
+     <Grid Grid.Row="4">
+      <Grid.ColumnDefinitions>
+       <ColumnDefinition x:Name="RightTreeCol" Width="0"/>
+       <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <TreeView x:Name="RightTree" Grid.Column="0" Background="#141E2B" Foreground="{StaticResource Text}" BorderBrush="#35475C" SelectedItemChanged="RightTree_SelectedItemChanged" Margin="0,0,4,0"/>
+<DataGrid x:Name="RightGrid" Grid.Column="1" MouseDoubleClick="RightGrid_DoubleClick" GotFocus="Grid_GotFocus"
+               SelectionMode="Extended" SelectionUnit="FullRow">
+      <DataGrid.ContextMenu>
+       <ContextMenu>
+        <MenuItem Header="Otwórz (Enter)" Click="ContextOpen_Click"/>
+        <MenuItem Header="Podgląd Lister (F3)" Click="View_Click"/>
+        <MenuItem Header="Edycja w Notatniku (F4)" Click="Edit_Click"/>
+        <Separator/>
+        <MenuItem Header="Kopiuj pełną ścieżkę" Click="ContextCopyPath_Click"/>
+        <MenuItem Header="Otwórz w Eksploratorze Windows" Click="ContextOpenExplorer_Click"/>
+        <MenuItem Header="Oblicz sumę SHA-256" Click="Checksum_Click"/>
+        <Separator/>
+        <MenuItem Header="Usuń do Kosza (F8)" Click="Delete_Click"/>
+       </ContextMenu>
+      </DataGrid.ContextMenu>
+      <DataGrid.Columns>
+       <DataGridTemplateColumn Width="26">
+        <DataGridTemplateColumn.CellTemplate>
+         <DataTemplate>
+          <Image Source="{Binding IconImage}" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+         </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+       </DataGridTemplateColumn>
+       <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*"/>
+       <DataGridTextColumn Header="Rozsz." Binding="{Binding Kind}" Width="75"/>
+       <DataGridTextColumn Header="Rozmiar" Binding="{Binding SizeText}" Width="95"/>
+       <DataGridTextColumn Header="Data modyfikacji" Binding="{Binding ModifiedText}" Width="135"/>
+      </DataGrid.Columns>
+     </DataGrid>
+     </Grid>
+
+     <TextBlock x:Name="RightSummaryText" Grid.Row="5" Text="Wczytywanie..." Foreground="{StaticResource Muted}" FontSize="11" Margin="2,4,0,0"/>
+    </Grid>
+   </Border>
+  </Grid>
+
+  <!-- Wbudowany wiersz poleceń CLI (Total Commander Command Line Bar) -->
+  <Border Grid.Row="3" Background="{StaticResource Panel2}" CornerRadius="6" Padding="6,4" Margin="0,6,0,6">
+   <DockPanel>
+    <TextBlock x:Name="CliPathPrefix" Text="C:\>" Foreground="{StaticResource Accent}" FontWeight="Bold" VerticalAlignment="Center" Margin="4,0,8,0"/>
+    <Button DockPanel.Dock="Right" Content="Wykonaj" Click="CliExecute_Click" Padding="8,2" Margin="6,0,0,0"/>
+    <TextBox x:Name="CliInputBox" KeyDown="CliInputBox_KeyDown" VerticalContentAlignment="Center"/>
+   </DockPanel>
+  </Border>
+
+  <!-- Pasek operacji F3 - F8 -->
+  <Border Grid.Row="4" Background="{StaticResource Panel2}" CornerRadius="8" Padding="6" Margin="0,0,0,6">
+   <UniformGrid Rows="1" Columns="7">
+    <Button Content="F3 Lister" Click="View_Click"/>
+    <Button Content="F4 Edycja" Click="Edit_Click"/>
+    <Button Content="F5 Kopiuj" Click="Copy_Click"/>
+    <Button Content="F6 Przenieś" Click="Move_Click"/>
+    <Button Content="F7 Folder" Click="NewFolder_Click"/>
+    <Button Content="F8 Do Kosza" Click="Delete_Click"/>
+    <Button Content="F2 Zmień nazwę" Click="Rename_Click"/>
+   </UniformGrid>
+  </Border>
+
+  <!-- Pasek stanu i postępu -->
+  <DockPanel Grid.Row="5" LastChildFill="True">
+   <TextBlock DockPanel.Dock="Right" Text="OGŚ • Szperacz 1.6.1 PRO" Foreground="{StaticResource Muted}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+   <ProgressBar x:Name="OperationProgress" DockPanel.Dock="Right" Width="200" Height="14" VerticalAlignment="Center" Margin="10,0,0,0" Visibility="Collapsed"/>
+   <TextBlock x:Name="StatusText" Text="Gotowy" Foreground="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+  </DockPanel>
+ </Grid>
+</Window>
